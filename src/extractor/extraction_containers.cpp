@@ -1193,10 +1193,8 @@ ExtractionContainers::ReferencedWays ExtractionContainers::IdentifyRestrictionWa
 
 ExtractionContainers::ReferencedTrafficSignals ExtractionContainers::IdentifyTrafficSignals()
 {
-    util::UnbufferedLog log;
-    log << "Collecting traffic signal information on " << external_traffic_signals.size()
+    util::Log() << "Collecting traffic signal information on " << external_traffic_signals.size()
         << " signals...";
-    TIMER_START(identify_traffic_signals);
 
     // Temporary store for nodes containing a unidirectional signal.
     std::unordered_map<OSMNodeID, TrafficLightClass::Direction> unidirectional_signals;
@@ -1272,8 +1270,7 @@ ExtractionContainers::ReferencedTrafficSignals ExtractionContainers::IdentifyTra
             }
         });
 
-    TIMER_STOP(identify_traffic_signals);
-    log << "ok, after " << TIMER_SEC(identify_traffic_signals) << "s";
+    util::Log() << "done collecting traffic signals";
 
     return {std::move(bidirectional_signals), std::move(signal_segments)};
 }

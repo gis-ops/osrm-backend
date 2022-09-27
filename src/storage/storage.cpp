@@ -63,9 +63,10 @@ RegionHandle setupRegion(SharedRegionRegister &shared_register,
     if (storage::SharedMemory::RegionExists(shm_key))
     {
         util::Log(logWARNING) << "Old shared memory region " << (int)shm_key << " still exists.";
-        util::UnbufferedLog() << "Retrying removal... ";
+        util::UnbufferedLog log;
+        log << "Retrying removal... ";
         storage::SharedMemory::Remove(shm_key);
-        util::UnbufferedLog() << "ok.";
+        log << "ok.";
     }
 
     io::BufferWriter writer;
@@ -146,17 +147,18 @@ bool swapData(Monitor &monitor,
 
     for (auto &old_handle : old_handles)
     {
-        util::UnbufferedLog() << "Marking old shared memory region "
+        util::UnbufferedLog log;
+        log << "Marking old shared memory region "
                               << static_cast<int>(old_handle.shm_key) << " for removal... ";
 
         // SHMCTL(2): Mark the segment to be destroyed. The segment will actually be destroyed
         // only after the last process detaches it.
         storage::SharedMemory::Remove(old_handle.shm_key);
-        util::UnbufferedLog() << "ok.";
-
-        util::UnbufferedLog() << "Waiting for clients to detach... ";
+        log << "ok.";
+        
+        log << "\nWaiting for clients to detach... ";
         old_handle.memory->WaitForDetach();
-        util::UnbufferedLog() << " ok.";
+        log << "ok.";
 
         shared_register.ReleaseKey(old_handle.shm_key);
     }
@@ -206,9 +208,10 @@ int Storage::Run(int max_wait, const std::string &dataset_name, bool only_metric
 
     if (!datastore_lock.try_lock())
     {
-        util::UnbufferedLog(logWARNING) << "Data update in progress, waiting until it finishes... ";
+        util::UnbufferedLog log(logWARNING);
+        log << "Data update in progress, waiting until it finishes... ";
         datastore_lock.lock();
-        util::UnbufferedLog(logWARNING) << "ok.";
+        log << "ok.";
     }
 
 #ifdef __linux__
